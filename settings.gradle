@@ -1,0 +1,3 @@
+rootProject.name = 'netty-study'
+include 'webclient-netty'
+include 'dummy-service'

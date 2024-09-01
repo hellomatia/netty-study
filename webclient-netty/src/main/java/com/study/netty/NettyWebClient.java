@@ -1,4 +1,4 @@
-package com.example.webclient;
+package com.study.netty;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -40,8 +40,8 @@ public class NettyWebClient {
                     p.addLast(new HttpObjectAggregator(1048576));
                     p.addLast(new SimpleChannelInboundHandler<FullHttpResponse>() {
                         @Override
-                        protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) {
-                            ByteBuf content = msg.content();
+                        protected void messageReceived(ChannelHandlerContext ctx, FullHttpResponse fullHttpResponse) throws Exception {
+                            ByteBuf content = fullHttpResponse.content();
                             String responseBody = content.toString(StandardCharsets.UTF_8);
                             result.complete(responseBody);
                         }
