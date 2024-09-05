@@ -1,3 +1,4 @@
 rootProject.name = 'netty-study'
 include 'webclient-netty'
 include 'dummy-service'
+include 'java-network-girl-netty'
