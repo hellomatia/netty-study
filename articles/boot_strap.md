@@ -98,5 +98,34 @@ public class BootStrap {
 ```
 Epoll 입출력 모드를 지원하는 서버 애플리케이션으로 변경한 코드이다. 이 코드도 몇 줄 변경하지 않고도 쉽게 바꿀 수 있다는 것을 알 수 있다. 이 코드는 윈도우 운영체제에서 실행한다면, 오류 코드가 출력되면서 서버가 실행되지 않는다. (Epoll은 Linux에서 지원하는 멀티플럭스 I/O이다.)
 
+### ServerBootstrap API
+**group - 이벤트 루프 설정**
+데이터 송수신 처리를 위한 이벤트 루프를 설정하는 group메서드를 살펴보자.
+```java
+@SuppressWarnings('unchecked')
+public B group(EventLoopGroup group) {
+    if (group == null) {
+        throw new NullPointerException("group");
+    }
+    if (this.group != null) {
+        throw new IllegalStateException("group set already");
+    }
+    this.group == group;
+    return (B) this;
+}
+```
+부트스트랩은 ServerBootstrap 클래스와 Bootstrap 클래스로 나뉜다. 
 
+클라이언트는 연결 요청이 완료된 이후의 데이터 송수신 처리를 위해서 하나의 이벤트 루프로 모든 처리가 가능하다.
 
+하지만 서버는 클라이언트의 연결 요청을 수락하기 휘한 이벤트 루프와 데이터 송수신 처리를 위한 이벤트 루프 두 종류의 이벤트 루프가 필요하다.
+
+즉 AbstractBootstrap 클래스에 정의된 grop메서드는 하나의 이벤트 루프만 설정하도록 되어 있다.
+
+ServerBootstrap에서는 두 개의 이벤트 루프를 정의하도록 Override되어있다.
+
+**channel - 소켓 입출력 모드 설정**
+소켓의 입출력 모드를 설정하는 channel 메서드의 경우 ServerBootstrap과 Bootstrap클래스 모두 존재한다.
+
+부트스트랩의 channel메서드에 등록된 소켓 채널 생성 클래스가 소켓 채널을 생성한다.
+                           
