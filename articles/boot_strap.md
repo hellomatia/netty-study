@@ -128,4 +128,117 @@ ServerBootstrap에서는 두 개의 이벤트 루프를 정의하도록 Override
 소켓의 입출력 모드를 설정하는 channel 메서드의 경우 ServerBootstrap과 Bootstrap클래스 모두 존재한다.
 
 부트스트랩의 channel메서드에 등록된 소켓 채널 생성 클래스가 소켓 채널을 생성한다.
-                           
+
+**channelFactory - 소켓 입출력 모드 설정**
+소켓의 입출력 모드를 ㅅ ㅓㄹ정하는 API인 channelFactory 메서드는 channel메서드와 동일하게 소켓의 입출력 모드를 설정하는API다.
+
+**handler - 서버 소켓 채널의 이벤트 핸들러 설정**
+서버 소켓 채널의 이벤트를 처리할 핸들러 설정 API인 handler 메서드는 등록된 이벤트 핸들러는 서버 소켓 채널에서 발생하는 이벤트를 수신하여 처리한다.
+
+```java
+public class BootStrap {
+    public static void main(String[] args) {
+        EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
+        EventLoopGroup workerGroup = new EpollEventLoopGroup();
+        try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+                    .channel(EpollServerSocketChannel.class)
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline p = ch.pipeline();
+                            p.addLast(new HttpServerCodec());
+                        }
+                    });
+        } finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }
+    }
+}
+```
+
+위 handler에 등록된 LoggingHandler는 네티가 기본적으로 제공하는 코덱이다. 채널에 발생하는 모든 이벤트를 로그로 출력한다.
+
+LoggingHandler는 네티가 제공하는 ChannelDuplexHandler를 상속받고 있다. 
+
+위 코드를 따라가보면, ChannelInboundHandler와 ChannelOutboundHandler인터페이스를 상속받아 구현하고 있다.
+
+양방향 이벤트 모두를 로그로 출력해야하지만, 서버 간의 데이터 송수신 이벤트를 모두 출력하지는 않는다.
+
+이는 ServerBootstrap의 handler에 등록된 이벤트 핸들러는 서버 소켓 채널에서 발생한 이벤트만을 처리하기 때문이다. 
+
+
+**childHandler - 소켓 채널의 데이터 가공 핸들러 설정**
+클라이언트 소켓 채널로 송수신되는 데이터를 가공하는 데이터 핸들러 설정 API이다.
+
+```java
+public class BootStrap {
+    public static void main(String[] args) {
+        EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
+        EventLoopGroup workerGroup = new EpollEventLoopGroup();
+        try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+                    .channel(EpollServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline p = ch.pipeline();
+                            p.addLast(new LoggingHandler(LogLevel.DEBUG));
+                            p.addLast(new HttpServerCodec());
+                        }
+                    });
+        } finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }
+    }
+}
+```
+
+**option - 서버 소켓 채널의 소캣 옵션 설정**
+서버 소켓 채널의 소켓 옵션을 설정하는 API이다. 여기에서 소켓 옵션이란, 소켓의 동작 방식을 지정하는 것을 말한다.
+
+즉 애플리케이션의 값을 변경하는 것이 아니라 커널에서 사용되는 값을 변경한다는 의미이다.
+
+|옵션|설명|기본값|
+|---|---|---|
+|TCP_NODELAY|데이터 송수신에 Nagle 알고리즘 비활성화 여부를 지정|false|
+|SO_KEEPALIVE|운영체제에서 시정된 시간에 한번씩 keepalve 패킷을 상대방에 전송|false|
+|SO_SNDBUF|상대방으로 송신할 커널 송신 버퍼의 크기|커널 설정에 따라 다름|
+|SO_RCVBUF|상대방으로부터 수신할 커널 수신 버퍼의 크기|커널 설정에 따라 다름|
+|SO_REUSEADDR|TIME_WAIT상태의 포트를 서버 소켓에 바인드할 수 있게함|false|
+|SO_LINGER|소켓을 닫을 때 커널의 송신 버퍼에 전송되지 않는 데이터의 전송 대기시간을 지정|false|
+|so_BACKLOG|동시에 수용 가능한 소켓 연결 요청 수|_|
+
+```java
+public class BootStrap {
+    public static void main(String[] args) {
+        EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
+        EventLoopGroup workerGroup = new EpollEventLoopGroup();
+        try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+                    .channel(EpollServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 1)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline p = ch.pipeline();
+                            p.addLast(new HttpServerCodec());
+                        }
+                    });
+        } finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }
+    }
+}
+```
+**childOption - 소켓 채널의 소캣 옵션 설정**
+childOption메서드는 option 메서드와 같이 소켓 채널에 소켓 옵션을 설정한다.
+
+option은 서버 소켓 채널의 옵션을 설정하는 데 반해 childOption메서드는 서버에 접속한 클라이언트 소켓 채널에 대한 옵션을 설정하는 데 사용한다.
