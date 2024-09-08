@@ -242,3 +242,25 @@ public class BootStrap {
 childOption메서드는 option 메서드와 같이 소켓 채널에 소켓 옵션을 설정한다.
 
 option은 서버 소켓 채널의 옵션을 설정하는 데 반해 childOption메서드는 서버에 접속한 클라이언트 소켓 채널에 대한 옵션을 설정하는 데 사용한다.
+
+### Bootstrap
+클라이언트 애플리케이션을 설정하는 Bootstrap의 주요 API를 살펴보자.
+
+Bootstrap이 제공하는 API는 기본적으로 ServerBootstrap과 같지만, 단일 소켓 채널에 대한 설정이므로 부모와 자식이라는 관계에 해당하는 API는 없다.
+
+**group - 이벤트 루프 설정**
+ServerBootstrap과 마찬가지로 소켓 채널의 이벤트 처리를 위한 이벤트 루프 객체를 설정한다.
+
+ServerBootstrap과는 다르게 단 하나의 이벤트 루프만 설정할 수 있다.
+
+**channel - 소켓 입출력 모드 설정**
+channel 메서드는 클라이언트 소켓 채널의 입출력 모드를 설정한다.
+
+**channelFactory - 소켓 입출력 모드 설정**
+클라이언트 소켓 채널의 입출력 모드를 설정하는 ServerBootstrap의 channelFactory 메서드와 동일한 동작을 수행한다.
+
+**handler - 클라이언트 소켓 채널의 이벤트 핸들러 설정**
+이 메서드를 통해서 등록되는 이벤트 핸들러는 클라이언트 소켓 채널에서 발생하는 이벤트를 수신하여 처리한다.
+
+**option - 소켓 채널의 소켓 옵션 설정**
+option 메서드는 클라이언트 소켓 채널의 옵션을 설정한다.
