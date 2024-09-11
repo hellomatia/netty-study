@@ -1,4 +1,6 @@
-## epoll 그리고 io_uring
+# epoll 그리고 io_uring
+
+[epoll 과 io_uring 성능 비교 - 이희승님 라이브](https://www.youtube.com/live/PsF9EeYndd4?si=VhSGrvbz-8Dp0NKS)
 
 네티를 공부하다보면 epoll에 대한 언급이 진짜 많이 나올 것이다. 
 
@@ -12,8 +14,9 @@ Netty는 Java NIO패키지 기반으로 만들어졌지만, JNI를 이용해 epo
 
 epoll을 알기전에 I/O multiplexing에 대해 살펴보자.
 
+<br>
 
-### I/O multiplexing
+## I/O multiplexing
 
 만약 어플리케이션에서 커널에 I/O요청을 한다고 생각해보자. 
 
@@ -80,6 +83,8 @@ epoll 인스턴스를 생성하고 관심있는 FD 이벤트들을 등록한다.
 
 어떻게 그 방식이 되는 걸까?
 
+<br>
+
 ## epoll
 
 네트워크 작업을 처리하는 epoll에 대해 살펴보자!
@@ -117,6 +122,8 @@ epoll 인스턴스를 생성하고 관심있는 FD 이벤트들을 등록한다.
 
 그래서 io_uring이라는 API가 등장하게 된다.
 
+<br>
+
 ## io_uring
 
 io_uring은 Jens Axboe라는 사람이 제안하여 만들어지게 되었다. io_uring은 ring buffer를 사용한다.
@@ -143,8 +150,9 @@ io_uring의 장점:
 
 io_uring은 리눅스 커널 5.1 버전부터 들어갔고, 계속 좋아지고 있다.
 
+<br>
 
-## Netty의 workerGroup의 Default값
+## Netty의 workerGroup의 default값
 
 Netty의 workerGroup의 eventLoop default 값은 CPU 코어 수 × 2이다.
 
@@ -157,6 +165,3 @@ io_uring은 효율적으로 동작하기 때문에 오히려 스레드 간의 �
 따라서 Netty에서 io_uring을 사용할 때는 workerGroup을 CPU 코어 개수 그대로 설정해주는 것이 좋다고 한다.
 
 이러한 설정 차이는 Netty의 성능과 리소스 사용에 큰 영향을 미칠 수 있으므로, 사용 환경에 맞는 적절한 설정이 중요하다.
-
-### 출처
-[epoll 과 io_uring 성능 비교 - 이희승님 라이브](https://www.youtube.com/live/PsF9EeYndd4?si=VhSGrvbz-8Dp0NKS)
