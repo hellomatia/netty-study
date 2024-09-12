@@ -243,3 +243,163 @@ onSubscribe에서 최대 개수를 처리하고, 다음 처리는 onNext에서 �
 
 한 Subscription에 대해서는 병렬적으로 처리하지는 않는다. 무조건 순서대로 데이터가 들어오는 것을 가정하고 만들어졌다.
 
+<br>
+# reactive streams - Operators
+
+```java
+import java.util.concurrent.Flow;
+
+public class PubSub {
+    public static void main(String[] args) {
+        Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(Collectiors.toList()));
+//        Publisher<Integer> mapPub = mapPub(pub, s -> s * 10);
+        Publisher<Integer> sumPub = sumPub(pub);
+        sumPub.subscirbe(longSub());
+    }
+
+    private static Publisher<Integer> sumPub(Publisher<Integer> pub) {
+        return new Publisher<Integer>() {
+            @Override
+            public void subscirbe(Subscriber<? super Integer> sub) {
+                pub.subscribe(new Subscriber<Integer>() {
+                    int sum = 0;
+                    
+                    @Override
+                    public void onSubscribe(Subscription subscription) {
+                        sub.onSubscirbe(subscription);
+                    }
+
+                    @Override
+                    public void onNext(Integer item) {
+                        sum += i;
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        sub.onError(throwable);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        sub.onNext(sum);
+                        sub.onComplete();
+                    }
+                });
+            }
+        }
+    }
+
+    private static Publishser<Integer> mapPub(Flow.Publisher<Integer> pub, Function<Integer, Integer> f) {
+        return new Publisher<Integer>() {
+            @Override
+            public void subscirbe(Subscriber<? super Integer> sub) {
+                pub.subscribe(new Subscriber<Integer>() {
+                    @Override
+                    public void onSubscribe(Subscription subscription) {
+                        sub.onSubscirbe(subscription);
+                    }
+
+                    @Override
+                    public void onNext(Integer item) {
+                        sub.onNext(f.apply(item));
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        sub.onError(throwable);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        sub.onComplete();
+                    }
+                });
+            }
+        };
+    }
+
+    private static Publisher<Integer> iterPub(Stream<?> stram) {
+        return new Publisher<Integer>() {
+            @Override
+            public void subscirbe(Subscriber subscriber) {
+                Iterator<Integer> it = itr.iterator();
+
+                subscriber.onSubscribe(new Subscription() {
+                    @Override
+                    public void request(long n) {
+                        es.submit(() -> {
+                            int i = 0;
+                            try {
+                                while (i++ < n) {
+                                    if (it.hasNext()) {
+                                        subscriber.onNext(it.next());
+                                    } else {
+                                        subscriber.onComplete();
+                                        break;
+                                    }
+                                }
+                            } catch (RuntimeException e) {
+                                subscriber.onError(e);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+
+                    }
+                });
+            }
+        };
+    }
+
+    private static Subscriber<Integer> logSub() {
+        return new Subscriber<Iteger>() {
+            Subscription subscription;
+
+            @Override
+            public void onSubscribe(Subscription subscription) {
+                System.out.println("onSubscribe");
+                this.subscription = subscription;
+                this.subscription.request(2);
+            }
+
+            @Override
+            public void onNext(Iteger item) {
+                System.out.println("onNext " + item);
+                this.subscription.request(1);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                System.out.println("onError");
+            }
+
+            @Override
+            public void onComplete() {
+                System.out.println("onComplete");
+            }
+        };
+    }
+}
+
+```
+
+```java
+public class ReactorEx {
+    public static void main(String[] args) {
+        Flux.create(e -> {
+            e.next(1);
+            e.next(2);
+            e.next(3);
+            e.complete();
+        })
+        .log()
+        .map(s -> s * 10)
+        .reduce(0, (a, b) -> a + b)
+        .log()
+        .subscirbe(System.out::println);
+    }
+}
+
+```
