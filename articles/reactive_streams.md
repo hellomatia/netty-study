@@ -244,6 +244,7 @@ onSubscribe에서 최대 개수를 처리하고, 다음 처리는 onNext에서 �
 한 Subscription에 대해서는 병렬적으로 처리하지는 않는다. 무조건 순서대로 데이터가 들어오는 것을 가정하고 만들어졌다.
 
 <br>
+
 # reactive streams - Operators
 
 ```java
