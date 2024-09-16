@@ -64,3 +64,62 @@
 읽기 인덱스와 쓰기 인덱스를 호출할 때마다 인덱스를 증가한다.
 
 네티의 바이트 버퍼는 읽기 작업이 완료된 후에 쓰기 작업을 위해서 flip 메서드를 호출이 필요 없다.
+
+### 네티 바이트 버퍼 생성
+
+네티 바이트 버퍼는 자바 바이트 버퍼와 달리 프레임 워크 레벨의 바이트 버퍼 풀을 제공한다.
+
+이를 통해 생성된 바이트 버퍼를 재사용한다. (ByteBufAllocator의 하위 추상화 구현체 PooledByteBufAllocator 클래스로 각 바이트 버퍼를 생성한다.)
+
+### 버퍼 사용
+**바이트 버퍼 읽기 쓰기**
+네티 바이트 버퍼는 자바 바이트 버퍼와 달리 읽기 쓰기 전환에 flip 메서드를 호출하지 않는다.
+
+**가변 크기 버퍼**
+자바 바이트 버퍼는 버퍼를 생성할 때 크기를 지정해야 하며 한 번 생성된 바이트 버퍼의 크기를 변경할 수 없다. 하지만 네티 바이트 버퍼는 생성된 버퍼의 크기를 동적으로 변경 할 수 있다.
+
+**바이트 버퍼 풀링**
+자바 바이트 버퍼는 언어 자체에 제공하는 버퍼 풀이 없다. 네티느 프레임워크에서 바이트 버퍼 풀을 제공하고 이씅며 다이렉트 버퍼와 힙 버퍼를 모두 풀링 할 수 있다.
+
+바이터 버퍼 풀링을 사용하여 얻을 수 있는 가장 큰 장점은 버퍼를 빈번히 할당하고 해제할 때 일어나는 가비지 컬렉션 횟수의 감소이다.
+
+네티 바이트 버퍼 풀링을 사용하여 가비지 컬렉션의 횟수를 줄일 수 있다면 가장 좋은 선택이다.
+
+바이터 버퍼 풀링을 하기 위해 참조 수 를 기록한다.
+
+네티는 바이트 버퍼의 참조 수를 관리하기 위하여 ReferenceCountUtil 클래스에 정의된 retain메서드와 release 메서드를 사용한다. retaion메서드는 참조수를 증가하고, release메서드는 참조수를 감소한다.
+
+**부호 없는 값 읽기**
+자바는 C언어와 다르게 부호 없는 데이터형이 없다. 
+
+종종 C 언어로 작성된 애플리케이션과 네트워크 통신할 때 부호 없는 데이터를 사용하는데, 자바에서 까다로운 작업에 속한다.
+
+네티 바이트 버퍼는 저장된 데이터의 부호 없는 값을 읽는 getUnsignedXXX 계열의 메서드를 제공한다.
+
+**바이트 버퍼 상호 변환**
+네티 바이트 버퍼는 nioBuffer 메서드를 사용하여 자바 NIO 버퍼로 변환이 가능하다. 변환된 NIO 바이트 버퍼는 네티 바이트 버퍼의 내부 바이트 배열을 공유한다.
+
+**채널과 바이트 버퍼 풀**
+네티 내부에서 데이터를 처리할 때 자바의 바이트 버퍼가 아닌 네티 바이트 버퍼를 사용한다.
+
+```java
+import java.nio.charset.Charset;
+
+public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        ByteBuf readMessage = (ByteBuf) msg;
+        System.out.println("channelRead: " + readMessage.toString(Charset.defaultCharset()));
+        
+        ByteBufAllocator byteBufAllocator = ctx.alloc();
+        ByteBuf newBuf = byteBufAllocator.buffer();
+        
+        ctx.write(msg);
+    }
+}
+```
+
+channelRead메서드의 인수로 사용되는 바이트 버퍼는 네티 바이트 버퍼이다. 즉 channelRead메서드가 실행된 이후의 네티 바이트 버퍼는 바이트 버퍼 풀로 돌아간다.
+
+
+
