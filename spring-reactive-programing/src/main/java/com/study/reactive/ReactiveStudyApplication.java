@@ -13,10 +13,13 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
+import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
 
 @SpringBootApplication
 @Slf4j
@@ -26,6 +29,25 @@ public class ReactiveStudyApplication {
     @RestController
     public static class MyController {
         Queue<DeferredResult<String>> results = new ConcurrentLinkedQueue<>();
+
+        @GetMapping("/emitter")
+        public ResponseBodyEmitter emitter() throws InterruptedException {
+            log.info("emitter");
+            ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    for (int i = 1; i <= 50; i++) {
+                        emitter.send("<p>Stream " + i + "</p>");
+                        Thread.sleep(100);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return emitter;
+        }
 
         @GetMapping("/dr")
         public DeferredResult<String> dr() throws InterruptedException {
