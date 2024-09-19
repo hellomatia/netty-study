@@ -14,10 +14,46 @@ public class LoadTest {
     static AtomicInteger counter = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException {
+//        callableTest();
+        drTest();
+    }
+
+    public static void callableTest() throws InterruptedException {
         ExecutorService es = Executors.newFixedThreadPool(100);
 
         RestTemplate rt = new RestTemplate();
         String url = "http://localhost:8080/callable";
+
+        StopWatch main = new StopWatch();
+        main.start();
+
+        for (int i = 0; i < 100; i++) {
+            es.execute(() -> {
+                int idx = counter.incrementAndGet();
+                log.info("Thread {}", idx);
+
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+
+                rt.getForObject(url, String.class);
+
+                stopWatch.stop();
+                log.info("Elapsed time: {} -> {}", idx, stopWatch.getTotalTimeMillis());
+            });
+        }
+
+        es.shutdown();
+        es.awaitTermination(100, TimeUnit.SECONDS);
+
+        main.stop();
+        log.info("Elapsed Total time: {}", main.getTotalTimeMillis());
+    }
+
+    public static void drTest() throws InterruptedException {
+        ExecutorService es = Executors.newFixedThreadPool(100);
+
+        RestTemplate rt = new RestTemplate();
+        String url = "http://localhost:8080/dr";
 
         StopWatch main = new StopWatch();
         main.start();
