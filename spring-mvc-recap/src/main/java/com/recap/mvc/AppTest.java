@@ -19,5 +19,22 @@ public class AppTest {
 
         result = restTemplate.postForObject("http://localhost:5678/header", entity, String.class);
         System.out.println(result);
+
+
+        HttpEntity<Body> entity2 = new HttpEntity<>(new Body("hello"), headers);
+        result = restTemplate.postForObject("http://localhost:5678/body", entity2, String.class);
+        System.out.println(result);
+    }
+
+    static class Body {
+        private String name;
+
+        public Body(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }
