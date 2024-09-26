@@ -1,5 +1,6 @@
 package com.study.webflux;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,6 +23,7 @@ public class WebFlux {
         SpringApplication.run(WebFlux.class, args);
     }
 
+    @Slf4j
     @RestController
     static class MyController {
 
@@ -41,7 +43,8 @@ public class WebFlux {
                     .flatMap(c -> c.bodyToMono(String.class))
                     .flatMap(res1 -> client.get().uri("http://localhost:8081/service1?req={req}", res1).exchange())
                     .flatMap(c -> c.bodyToMono(String.class))
-                    .flatMap(res2 -> Mono.fromCompletionStage(myService.work(res2)));
+                    .flatMap(res2 -> Mono.fromCompletionStage(myService.work(res2)))
+                    .doOnNext(c -> log.info(c));
         }
     }
 
