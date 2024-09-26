@@ -9,8 +9,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Stream;
-
 @EnableWebFlux
 @SpringBootApplication
 public class WebFlux {
@@ -29,10 +27,9 @@ public class WebFlux {
             // Mono는 Publisher이다.
             // 비동기 작업을 수행하고 Publisher하는 역할을 하는거다.
             // 하지만 누가 Subscribe를 하지 않으면 Publisher하지 않는다.
-            Mono<ClientResponse> responseMono = client.get()
+            return client.get()
                     .uri("http://localhost:8081/service1?req={req}", idx)
-                    .exchange();
-            return responseMono
+                    .exchange()
                     .flatMap(clientResponse -> clientResponse.bodyToMono(String.class));
         }
     }
