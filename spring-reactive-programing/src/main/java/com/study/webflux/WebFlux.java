@@ -30,7 +30,9 @@ public class WebFlux {
             return client.get()
                     .uri("http://localhost:8081/service1?req={req}", idx)
                     .exchange()
-                    .flatMap(clientResponse -> clientResponse.bodyToMono(String.class));
+                    .flatMap(c -> c.bodyToMono(String.class))
+                    .flatMap(res1 -> client.get().uri("http://localhost:8081/service1?req={req}", res1).exchange())
+                    .flatMap(c -> c.bodyToMono(String.class));
         }
     }
 }
