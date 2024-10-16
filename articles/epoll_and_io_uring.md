@@ -87,6 +87,17 @@ epoll 인스턴스를 생성하고 관심있는 FD 이벤트들을 등록한다.
 
 ## epoll
 
+select나 poll을 사용하는 방법도 있다.
+출처: https://letitkang.tistory.com/195
+### select 
+- fd_set 구조체에 fd를 등록하여 싱글 쓰레드로 이벤트를 감지한다.
+- fd_set은 bitmask이기 때문에 1024개까지 등록이 가능하다.
+- 그 이상의 fd에 대해서는 관리를 할 수 없다.
+
+### poll
+- select의 단점을 보안하였지만, fd를 순차적으로 검사한다.
+
+### epoll
 네트워크 작업을 처리하는 epoll에 대해 살펴보자!
 ![epoll이 동작 과정](./images/epoll.png)
 
