@@ -23,4 +23,6 @@ dependencies {
     implementation 'org.springframework.statemachine:spring-statemachine-data-redis'
     testImplementation 'org.springframework.statemachine:spring-statemachine-test'
     compileOnly 'org.projectlombok:lombok'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
